@@ -1,0 +1,14 @@
+threshold: 50 # probability in percentage points, so 50 is 50%
+input_dir: ???
+output_dir: ???
+num_trajectories: 50
+num_histogram_samples: 10
+split: "held_out"
+
+special_codes: {}
+  # HOSPITAL_ADMISSION: "HOSPITAL_ADMISSION//.*"
+  # ABNORMAL_CREATININE: 'LAB//50912//mg/dL//value_\[2.4,inf\)|LAB//51081//mg/dL//value_\[2.1,inf\)|LAB//52024//mg/dL//value_\[2.3,3.7\)|LAB//52024//mg/dL//value_\[3.7,inf\)|LAB//52546//mg/dL//value_\[1.6,inf\)'
+  # ABNORMAL_HEMATOCRIT: 'LAB//50810//%//value_\[-inf,23.0\)|LAB//50810//%//value_\[23.0,25.0\)|LAB//51221//%//value_\[-inf,24.3\)'
+  # ABNORMAL_HEMOGLOBIN: 'LAB//50811//g/dL//value_\[-inf,7.6\)|LAB//50811//g/dL//value_\[7.6,8.3\)|LAB//51222//g/dL//value_\[-inf,7.8\)'
+  # ABNORMAL_LEUKOCYTE: 'LAB//51300//K/uL//value_\[-inf,3.4\)|LAB//51300//K/uL//value_\[3.4,4.1\)|LAB//51300//K/uL//value_\[4.1,4.7\)|LAB//51300//K/uL//value_\[4.7,5.2\)|LAB//51301//K/uL//value_\[-inf,3.8\)|LAB//51301//K/uL//value_\[3.8,5.0\)|LAB//51755//K/uL//value_\[-inf,4.9\)'
+  # ABNORMAL_PLATELET: 'LAB//51265//K/uL//value_\[-inf,82.0\)'

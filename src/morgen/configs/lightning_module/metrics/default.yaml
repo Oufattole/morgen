@@ -1,0 +1,5 @@
+_target_: morgen.training.NextCodeMetrics
+
+top_k: [1, 2, 5, 10]
+vocab_size: ???
+ignore_index: 0

@@ -1,0 +1,14 @@
+defaults:
+  - histogram
+  - _self_
+
+# Use custom HistogramDatamodule that returns MEDSTorchHistogramBatch
+_target_: "morgen.datamodules.histogram_datamodule.HistogramDatamodule"
+
+config:
+  static_inclusion_mode: OMIT
+  max_seq_len: 1000000
+  task_labels_dir: ???
+  seq_sampling_strategy: TO_END
+  padding_side: LEFT
+  include_window_last_observed_in_schema: True

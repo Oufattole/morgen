@@ -1,0 +1,27 @@
+defaults:
+  - config: MEDSTorchDataConfig # Added in the structured config store
+  - _self_
+
+# Use custom HistogramDatamodule that returns MEDSTorchHistogramBatch
+_target_: "morgen.datamodules.histogram_datamodule.HistogramDatamodule"
+
+histogram_max_seq_len: 512
+
+config:
+  static_inclusion_mode: OMIT
+  max_seq_len: 1000000
+
+batch_size: ???
+# The number of dataloader workers will default to the minimum of the number of CPU cores minus 1 and the
+# number of GPUs times 8.
+num_workers: ${oc_min:${sub:${num_cores:},1},${int_prod:${num_gpus:},8}}
+# Pinning memory can improve performance when using GPUs.
+pin_memory: ${gpus_available:}
+persistent_workers: false
+prefetch_factor: 8
+anchoring_strategy: END_OF_TIMELINE
+empty_window_mode: SINGLE_GAP
+specific_event_regex: null
+include_anchor_token: false
+max_windows: null
+window_sampling_strategy: random

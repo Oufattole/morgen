@@ -1,0 +1,13 @@
+input_dir: ???
+intermediate_dir: ???
+output_dir: ???
+pipeline: mimic_filtered
+
+log_dir: ${output_dir}/.logs
+
+do_reshard: False
+do_demo: False
+
+hydra:
+  run:
+    dir: "${log_dir}"

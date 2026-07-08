@@ -1,0 +1,72 @@
+# Configuration for histogram trajectory generation (Phase 3)
+
+defaults:
+  - datamodule: generate_histogram_trajectories
+  - trainer: default
+  - inference: default
+  - gap_config: default
+  - _self_
+
+do_fusion: false # Set to true to enable fusion mode
+datamodule:
+  fusion_mode: histogram_only
+  window_size_days: ${window_size_days}
+em_params_dir: null
+# Model configuration - must match training
+quantizer_config:
+  vocab_size: ${get_vocab_size:${datamodule.config.tensorized_cohort_dir}} # Number of medical codes in histogram (full vocabulary)
+  embedding_dim: 16 # Latent embedding dimension
+  n_embeddings: 128 # Codebook size (number of discrete tokens)
+  max_count: 64 # Count clipping level for count-histogram quantization
+  beta: 0.25 # VQ-VAE beta parameter
+  encoder_hidden_dims: [64, 32, 16] # Encoder network architecture
+  decoder_hidden_dims: [16, 32, 64] # Decoder network architecture
+  dropout: 0.0 # Dropout rate
+  em_params_dir: ${em_params_dir} # Path to EM params directory, leave null if using VQ-VAE
+
+# Autoregressive model configuration
+model_config:
+  # Model Shape
+  num_hidden_layers: 4
+  num_attention_heads: 4
+  attention_head_dim: 64
+  hidden_size: ${int_prod:${.num_attention_heads},${.attention_head_dim}}
+  intermediate_size: ${int_prod:${.hidden_size},4}
+
+  # Regularization
+  attention_dropout: 0.0
+  hidden_dropout: 0.0
+  classifier_dropout: 0.1
+
+  # Dictated by the data
+  max_position_embeddings: 512
+  vocab_size: null # Will be overridden by processor.total_vocab_size
+
+# Generation parameters (optimized for speed)
+max_new_tokens: 24 # Shorter generated sequences for speed (was 30)
+window_size_days: 30 # Size of each histogram window in days
+
+# Trainer for generation
+trainer:
+  logger:
+    _target_: pytorch_lightning.loggers.CSVLogger
+    save_dir: "."
+    name: "histogram_generation_logs"
+
+# Required checkpoint paths
+model_initialization_dir: ??? # Path to trained autoregressive model
+output_dir: ???
+
+output_metadata_dir: ${output_dir}/metadata
+pretrained_model_config: ${load_yaml_file:${model_initialization_dir}/config.yaml}
+ckpt_path: ${model_initialization_dir}/best_model.ckpt
+
+# Additional required fields for generation pattern
+do_overwrite: false
+seed: null
+
+log_dir: ${output_dir}/.logs
+
+hydra:
+  run:
+    dir: "${log_dir}"

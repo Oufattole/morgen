@@ -1,0 +1,41 @@
+defaults:
+  - logger: csv
+  - callbacks: default
+  - _self_
+
+_target_: lightning.pytorch.trainer.Trainer
+
+default_root_dir: ${output_dir}
+
+min_epochs: 1 # prevents early stopping
+max_epochs: null # We don't control the max epochs, we control the max steps.
+
+# We'll control the model through max_steps rather than max_epochs for consistency across dataset sizes and
+# ease of setting corresponding parameters in the LR scheduler setup.
+# Recommendations in setting max_steps:
+#   * Small models (< 100M parameters): 20,000-50,000 steps
+#   * Medium models (100M-1B parameters): 50,000-200,000 steps
+#   * Large models (> 1B parameters): 200,000+ steps
+# TODO: Eventually, set up _pretrain_small.yaml, _pretrain_medium.yaml, and _pretrain_large.yaml to control
+# this and other model size parameters more easily.
+max_steps: 50000
+
+accelerator: "auto"
+devices: "auto"
+
+accumulate_grad_batches: 1 # set to 1 for no gradient accumulation, >1 for gradient accumulation
+
+log_every_n_steps: 50
+
+# perform a validation loop every N training epochs
+check_val_every_n_epoch: 1
+val_check_interval: 0.2 # validate five times per epoch
+limit_val_batches: 200 # use only up to 200 validation batches to speed up training
+
+# set True to to ensure deterministic results
+# makes training slower but gives more reproducibility than just setting seeds
+deterministic: False
+
+gradient_clip_val: 1.0
+# mixed precision for extra speed-up
+precision: "16-mixed"

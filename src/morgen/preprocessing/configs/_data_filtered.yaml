@@ -1,0 +1,59 @@
+input_dir: ${oc.env:RAW_MEDS_DIR}
+output_dir: ${oc.env:MTD_INPUT_DIR}
+
+stages:
+  - count_codes:
+      aggregations:
+        - code/n_occurrences
+        - code/n_subjects
+    _base_stage: aggregate_code_metadata
+  - filter_measurements:
+      _match_revise:
+        - _matcher: # No filter for birth, death, admission, discharge, registration, or time intervals.
+            code:
+              regex: "MEDS_DEATH.*|MEDS_BIRTH.*|.*ADMISSION.*|.*DISCHARGE.*|.*REGISTRATION.*|.*TIME.*|LAB//52546//mg/dL|LAB//50912//mg/dL|LAB//51081//mg/dL|LAB//52024//mg/dL|LAB//51645//g/dL|LAB//51222//g/dL|LAB//50811//g/dL|LAB//50855//UNK|LAB//51221//%|LAB//51638//%|LAB//50810//%|LAB//51300//K/uL|LAB//51301//K/uL|LAB//51755//K/uL|LAB//51265//K/uL"
+        - _matcher:
+            code:
+              regex: ".*"
+          min_subjects_per_code: 100000000000
+  - filter_subjects:
+      min_events_per_subject: ${oc.decode:${oc.env:MIN_EVENTS_PER_SUBJECT,10}}
+      min_measurements_per_subject: null
+  - add_time_derived_measurements:
+      age: null
+      time_of_day: null
+      timeline_tokens:
+        time_unit: years
+  - fit_quantile_binning:
+      aggregations:
+        - code/n_occurrences
+        - code/n_subjects
+        - name: values/quantiles
+          quantiles: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    _base_stage: aggregate_code_metadata
+  - bin_numeric_values:
+      do_drop_numeric_value: True
+      custom_bins:
+        TIMELINE//DELTA//years:
+          1_minute: 0.00000190258
+          5_minutes: 0.00000951293
+          10_minutes: 0.00001902587
+          30_minutes: 0.00005707762
+          1_hour: 0.00011415525
+          3_hours: 0.00034246575
+          6_hours: 0.0006849315
+          12_hours: 0.00136986301
+          1_day: 0.00273972602
+          2_days: 0.00547945205
+          4_days: 0.0109589041
+          7_days: 0.01917808219
+          14_days: 0.03835616438
+          30_days: 0.08219178082
+          60_days: 0.16438356164
+          120_days: 0.32876712328
+          1_year: 1
+          2_years: 2
+          5_years: 5
+          10_years: 10
+          20_years: 20
+          40_years: 40

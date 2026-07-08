@@ -1,0 +1,77 @@
+# Configuration for histogram quantizer training (Phase 1)
+
+defaults:
+  - datamodule: histogram
+  - trainer: default
+  - gap_config: default
+  - _self_
+
+cache_dir: null
+
+special_codes:
+  EOS: "TIMELINE//END"
+  MEDS_DEATH: "MEDS_DEATH"
+  HOSPITAL_ADMISSION: "HOSPITAL_ADMISSION//.*"
+  ABNORMAL_CREATININE: 'LAB//50912//mg/dL//value_\[2.4,inf\)|LAB//51081//mg/dL//value_\[2.1,inf\)|LAB//52024//mg/dL//value_\[2.3,3.7\)|LAB//52024//mg/dL//value_\[3.7,inf\)|LAB//52546//mg/dL//value_\[1.6,inf\)'
+  ABNORMAL_HEMATOCRIT: 'LAB//50810//%//value_\[-inf,23.0\)|LAB//50810//%//value_\[23.0,25.0\)|LAB//51221//%//value_\[-inf,24.3\)'
+  ABNORMAL_HEMOGLOBIN: 'LAB//50811//g/dL//value_\[-inf,7.6\)|LAB//50811//g/dL//value_\[7.6,8.3\)|LAB//51222//g/dL//value_\[-inf,7.8\)'
+  ABNORMAL_LEUKOCYTE: 'LAB//51300//K/uL//value_\[-inf,3.4\)|LAB//51300//K/uL//value_\[3.4,4.1\)|LAB//51300//K/uL//value_\[4.1,4.7\)|LAB//51300//K/uL//value_\[4.7,5.2\)|LAB//51301//K/uL//value_\[-inf,3.8\)|LAB//51301//K/uL//value_\[3.8,5.0\)|LAB//51755//K/uL//value_\[-inf,4.9\)'
+  ABNORMAL_PLATELET: 'LAB//51265//K/uL//value_\[-inf,82.0\)'
+
+# special_codes:
+#   # Metadata & Administrative
+#   EOS: 'TIMELINE//END'
+#   DEATH: 'Condition Type/OMOP4822053'
+#   HOSPITAL_ADMISSION: 'HOSPITAL_ADMISSION//.*'
+#   DISCHARGE: 'discharge/IP'
+
+#   # Diagnoses (SNOMED)
+#   HYPERTENSION: 'SNOMED/59621000'
+#   HYPERLIPIDEMIA: 'SNOMED/55822004'
+#   PANCREATIC_CANCER: 'SNOMED/372003004'
+#   CELIAC: 'SNOMED/396331005'
+#   LUPUS: 'SNOMED/55464009'
+#   ACUTE_MI: 'SNOMED/57054005'
+
+#   # Abnormal Labs (LOINC with Binned Deciles)
+#   ABNORMAL_CREATININE: 'LOINC/2160-0//value_\[2.57,inf\)'
+#   ABNORMAL_HEMATOCRIT: 'LOINC/4544-3//value_\[-inf,23.8\)'
+#   ABNORMAL_HEMOGLOBIN: 'LOINC/718-7//value_\[-inf,7.8\)'
+#   ABNORMAL_LEUKOCYTE: 'LOINC/6690-2//value_\[4.19,4.52\)\|LOINC/6690-2//value_\[2.86,3.1\)\|LOINC/6690-2//value_\[3.6,3.88\)\|LOINC/6690-2//value_\[3.88,4.19\)\|LOINC/6690-2//value_\[4.52,5.1\)\|LOINC/6690-2//value_\[2.59,2.86\)\|LOINC/6690-2//value_\[-inf,2.59\)\|LOINC/6690-2//value_\[3.1,3.32\)\|LOINC/6690-2//value_\[3.32,3.6\)'
+#   ABNORMAL_PLATELET: 'LOINC/777-3//value_\[54.0,104.0\)\|LOINC/777-3//value_\[-inf,54.0\)'
+
+# Quantizer configuration
+quantizer_config:
+  vocab_size: ${get_vocab_size:${datamodule.config.tensorized_cohort_dir}} # Number of medical codes in histogram (full vocabulary)
+  embedding_dim: 16 # Latent embedding dimension
+  n_embeddings: 128 # Codebook size (number of discrete tokens)
+  max_count: 64 # Count clipping level for count-histogram quantization
+  beta: 0.25 # VQ-VAE beta parameter
+  encoder_hidden_dims: [64, 32, 16] # Encoder network architecture
+  decoder_hidden_dims: [16, 32, 64] # Decoder network architecture
+  dropout: 0.0 # Dropout rate
+
+datamodule:
+  window_size_days: ${window_size_days}
+window_size_days: 30
+
+lightning_module:
+  learning_rate: 1e-3
+  weight_decay: 0.01
+
+# Training configuration
+trainer:
+  max_epochs: 10
+  # limit_train_batches: 20
+  logger:
+    _target_: pytorch_lightning.loggers.WandbLogger
+    project: "Morgen"
+    name: "histogram_quantizer"
+    save_dir: "."
+    log_model: false
+
+# Output configuration
+output_dir: null # Will be set at runtime
+do_overwrite: false
+do_resume: false
+seed: null

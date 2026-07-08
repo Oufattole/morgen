@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "morgen"
+dynamic = ["version"]
+authors = [
+  {name="Matthew McDermott", email="mattmcdermott8@gmail.com"},
+  {name="Nassim Oufattole", email="noufattole@gmail.com"},
+]
+description = "A simple auto-regressive, 'everything-is-code' style model for MEDS datasets"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "polars~=1.30.0",
+  "pyarrow",
+  "hydra-core",
+  "numpy",
+  "psutil",
+  "pynvml",
+  "meds~=0.4.0",
+  "filelock",
+  "MEDS-transforms~=0.5.2",
+  "transformers",
+  "torch",
+  "torchmetrics",
+  "lightning~=2.5.1",
+  "yaml_to_disk",
+]
+
+[tool.setuptools_scm]
+
+[project.optional-dependencies]
+# Extensions
+wandb = ["wandb"]
+mlflow = ["mlflow", "psutil", "pynvml"]
+
+# Core Development
+dev = ["pre-commit<4", "ruff"]
+
+[project.urls]
+Homepage = "https://github.com/oufattole/morgen"
+Issues = "https://github.com/oufattole/morgen/issues"
+
+[project.scripts]
+# Data preprocessing
+morgen_process_data = "morgen.preprocessing.__main__:process_data"
+morgen_profile_run = "morgen.profiling.run_and_profile:main"
+# Model training
+morgen_pretrain = "morgen.__main__:pretrain"
+# Generation
+morgen_generate_trajectories = "morgen.__main__:generate_trajectories"
+
+# Histogram training
+morgen_train_quantizer = "morgen.__main__:train_quantizer"
+morgen_train_autoregressive_histogram = "morgen.__main__:train_autoregressive_histogram"
+morgen_generate_histogram_trajectories = "morgen.__main__:generate_histogram_trajectories"
+morgen_process_generated_histograms = "morgen.__main__:process_generated_histograms"
+morgen_process_generated_histograms_soft_decoding = "morgen.__main__:process_generated_histograms_soft_decoding"
+morgen_fit_em = "morgen.fit_em:train_analytic_quantizer"
+
+[tool.coverage.report]
+exclude_also = ["logger\\.debug", "except ImportError:", "if TYPE_CHECKING:"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 110
+extend-exclude = ["docs/index.md"]
+
+# Enable linters
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "RUF", # Ruff-specific rules
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "N",   # pep8-naming
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Unused imports in __init__ files
+"__main__.py" = ["F401"]  # Unused imports in __main__ files as we use them for OmegaConf Resolvers
+
+[tool.ruff.lint.pep8-naming]
+extend-ignore-names = ["*MEDS*", "F", "L", "M", "D", "LR_*", "*GPT*"]  # Ignore MEDS in variable names

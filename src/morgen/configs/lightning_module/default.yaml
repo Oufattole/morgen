@@ -1,0 +1,11 @@
+defaults:
+  - metrics: default
+  - optimizer: adamw
+  - LR_scheduler: get_cosine_schedule_with_warmup
+  - _self_
+
+_target_: morgen.training.module.MorgenModule
+
+model:
+  gpt_kwargs:
+    max_position_embeddings: ${datamodule.config.max_seq_len}

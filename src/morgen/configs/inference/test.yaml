@@ -1,0 +1,4 @@
+generate_for_splits:
+  - held_out
+
+N_trajectories_per_task_sample: 50

@@ -1,0 +1,4 @@
+# @package _global_
+gap_config:
+  _target_: morgen.model.histogram_model.GapTokenConfig
+  max_gap_length: 1200 # ~100 years of 30-day windows

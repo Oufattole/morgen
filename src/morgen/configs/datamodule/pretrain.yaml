@@ -1,0 +1,7 @@
+defaults:
+  - default
+  - _self_
+
+config:
+  max_seq_len: ${max_seq_len}
+  seq_sampling_strategy: RANDOM

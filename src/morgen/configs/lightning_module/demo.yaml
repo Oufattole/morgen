@@ -1,0 +1,7 @@
+defaults:
+  - default
+  - model: demo
+  - _self_
+
+metrics:
+  top_k: [1, 2, 3]
